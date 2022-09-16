@@ -41,10 +41,10 @@ Procurei deixar o código o mais limpo possível, onde segmentei o `remote_state
 
 Para poder fazer o deploy de toda a infra, é necessário seguir os seguintes passsos:
 
-1. Na raiz do projeto, `cd infra/devops/remote_state` e rodar `terraform apply -lock=false --auto-approve`
+1. Na raiz do projeto, `cd infra/devops/remote_state` e rodar `terraform init` e depois `terraform apply --auto-approve`
     - OBS: No remote state existe o códifo para criação do bucket S3 onde vai ficar o arquivo terraform.tfstate, que guarda o estado remoto do cluster, afim de ser compartilhado com a equipe, para trabalhos simuntâneos. 
-2. Ainda na raiz do projeto, `cd infra/devops/ecs` e rodar `terraform apply -lock=false --auto-approve`
-3. Seguindo a premissa de que os passos 1 e 2 foram criados corretamente, é necessário novamente efetuar o deploy do ecs, afim de habilitar a task `terraform apply -var="release_version=1" -lock=false --auto-approve`
+2. Ainda na raiz do projeto, `cd infra/devops/ecs` e rodar `terraform init` e depois `terraform apply --auto-approve`
+3. Seguindo a premissa de que os passos 1 e 2 foram criados corretamente, é necessário novamente com a tag release_version para efetuar o deploy do ecs, afim de habilitar a task `terraform apply -var="release_version=1" --auto-approve`
 
 ## CI/CD Github Actions
 Após a subida com sucesso de toda a infra nos passos anteriores, finalizo a entrega do teste com um Action no github, onde a partir de um push, pull ou create, efetua o teste da aplicação em GO, bem como o deploy automático do container no ECS da AWS. 
