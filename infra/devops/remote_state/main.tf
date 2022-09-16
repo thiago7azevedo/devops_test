@@ -24,8 +24,8 @@ resource "aws_s3_bucket" "devops-ninja-terraform" {
   }
 }
 
-resource "aws_dynamodb_table" "devops-ninja-terraform-locks" {
-  name         = "devops-ninja-terraform-locks"
+resource "aws_dynamodb_table" "devops-ninja-terraform_locks" {
+  name         = "devops-ninja-terraform_locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 

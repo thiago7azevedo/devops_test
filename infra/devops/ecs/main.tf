@@ -112,10 +112,10 @@ resource "aws_ecs_task_definition" "devops-ninja-task_definition" {
       name      = "devops-ninja"
       image     = "${var.image}"
       essential = true      
-      logConfiguration = {
-        "LogDriver" : "awslogs",
-        "Options" : {awslogs-group : "/ecs/fargate-task-definition", awslogs-region: "us-east-1,", awslogs-stream-prefix: "logs"},
-}
+      #logConfiguration = {
+        #"LogDriver" : "awslogs",
+        #"Options" : {awslogs-group : "/ecs/fargate-task-definition", awslogs-region: "us-east-1,", awslogs-stream-prefix: "logs"},
+
       
       portMappings = [
         {
