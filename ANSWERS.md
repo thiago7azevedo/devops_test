@@ -51,8 +51,9 @@ Após a subida com sucesso de toda a infra nos passos anteriores, finalizo a ent
 Em tempo, são necessários o cadastramento dos secrets actions no settings do projeto: `AWS_ACCESS_KEY_ID`, `AWS_REGION`, `AWS_SECRET_ACCESS_KEY`, `DOCKERHUB_TOKEN` e `DOCKERHUB_USERNAME`.
 
 Segue link com a URL do Build efetuado com sucesso:
-[![Teste e Deploy para Amazon ECS](https://github.com/thiago7azevedo/ninja-terraform/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/thiago7azevedo/devops_test/actions/workflows/ci-cd.yml)
+[![Teste e Deploy para Amazon ECS - Projeto inicial](https://github.com/thiago7azevedo/ninja-terraform/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/thiago7azevedo/devops_test/actions/workflows/ci-cd.yml)
 
+[![Teste e Deploy para Amazon ECS - Projeto do teste](https://github.com/thiago7azevedo/devops_test/actions/workflows/ci-cd.yml/badge.svg?branch=master)](https://github.com/thiago7azevedo/devops_test/actions/workflows/ci-cd.yml)
 
 Para a resposta da a questão de como alterar o nome da aplicação de Ninja para outro nome. Com o projeto no repositório local ou no remoto, é necessário efetuar a alteração do arquivo `main.go` na linha 19 `appname := getEnv("APP_NAME", "Ninja")` modificando a entrada para a variável `APP_NAME`. 
 Após a mudança e com o devido commit efetuado, automativamente será gerado uma nova imagem com a alteração efetuada, subindo direto como uma task no cluster ECS e ficando disponível para acesso no endereço: [Aplicação Teste Devops Get Ninja](http://devops-ninja-lb-devops-1138630858.us-east-1.elb.amazonaws.com/healthcheck).
