@@ -1,0 +1,92 @@
+name: Teste e Deploy para Amazon ECS
+on:
+  create:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  AWS_REGION: us-east-1                   
+  ECS_SERVICE: devops-ninja-service              
+  ECS_CLUSTER: cluster-devops              
+  ECS_TASK_DEFINITION: devops-ninja-task_definition 
+  CONTAINER_NAME: devops-ninja
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: Teste aplicação em golang - Devops-Ninja
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go v3
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+
+    - name: Teste go
+      run: |
+        cd ninja
+        go build -v ./...
+        go test -v ./...
+
+  deploy:
+    name: Deploy aplicação em golang - Devops-Ninja
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set Tag Number
+      id: tag-number
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+    - name: Check Tag Release
+      env:
+        RELEASE_VERSION: ${{ steps.tag-number.outputs.tag }}
+      run: |
+         echo $RELEASE_VERSION
+         echo ${{ steps.vars.outputs.tag }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Build, tag, and push image to Github
+      id: build-image
+      env:
+        IMAGE_TAG: latest
+        DOCKERHUB_TOKEN: ${{ env.DOCKERHUB_TOKEN }}
+        DOCKERHUB_USERNAME: ${{ env.DOCKERHUB_USERNAME }}
+      run: |
+        docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
+        cd ninja
+        docker build --file ./Dockerfile -t thiago7azeveo/devops-ninja:latest .
+        docker push thiago7azeveo/devops-ninja:latest
+        echo "::set-output name=image::thiago7azeveo/devops-ninja:latest"
+        aws ecs describe-task-definition --task-definition devops-ninja-task_definition \
+         --query taskDefinition > task-definition.json     
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: ${{ env.CONTAINER_NAME }}
+        image: ${{ steps.build-image.outputs.image }}
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true
